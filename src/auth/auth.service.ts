@@ -3,8 +3,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
 import * as md5 from 'md5';
-import { Tokens, Profile } from './types';
 import { JwtService } from '@nestjs/jwt';
+import { Profile, Tokens } from 'src/common/types';
+import { UserStats } from '@prisma/client';
 
 const defaultAvatarPath = 'https://www.gravatar.com/avatar/';
 
@@ -26,8 +27,6 @@ export class AuthService {
 
     if (duplicate) throw new ForbiddenException("Email already exists.")
 
-    console.log(`${defaultAvatarPath}${md5(dto.email)}?f=y&d=identicon`)
-
     const newUser = await this.prismaService.user.create({
       data: {
         name: dto.name,
@@ -39,6 +38,7 @@ export class AuthService {
 
     const tokens = await this.getTokens(newUser.id, dto);
     await this.updateRtHash(newUser.id, tokens.refresh_token);
+    await this.createNewUserStats(newUser.id);
 
     return tokens;
   }
@@ -113,6 +113,7 @@ export class AuthService {
     if(!user) throw new ForbiddenException('User Not Found.');
 
     return {
+      id: user.id,
       name: user.name,
       email: user.email,
       avatar_path: user.avatar_path
@@ -166,5 +167,13 @@ export class AuthService {
       access_token: at,
       refresh_token: rt
     }
+  }
+
+  private createNewUserStats(userId: number): Promise<UserStats> {
+    return this.prismaService.userStats.create({
+      data: {
+        user_id: userId
+      }
+    });
   }
 }

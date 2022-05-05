@@ -15,11 +15,59 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email       String @unique
+  email       String  @unique
   name        String
   avatar_path String
   hash        String
   hashedRt    String?
 
   @@map("users")
+  UserStats       UserStats?
+  UserGenresStats UserGenresStats[]
+  UserRatings     UserRatings[]
+  UserWatched     UserWatched[]
+}
+
+model UserStats {
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int  @unique
+
+  movies_count  Int @default(0)
+  hours_count   Int @default(0)
+  reviews_count Int @default(0)
+
+  @@map("user_stats")
+}
+
+model UserGenresStats {
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+
+  genre_id      Int
+  genre_name    String
+
+  movies_count Int @default(0)
+
+  @@map("user_genres_stats")
+
+  @@unique([user_id, genre_id], name: "userGenre")
+}
+
+model UserRatings {
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+  tmdb_id Int
+  rating  Int
+
+  @@map("user_ratings")
+  @@unique([user_id, tmdb_id], name: "userRating")
+}
+
+model UserWatched {
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+  tmdb_id Int
+
+  @@map("user_watched")
+  @@unique([user_id, tmdb_id], name: "userWatched")
 }
