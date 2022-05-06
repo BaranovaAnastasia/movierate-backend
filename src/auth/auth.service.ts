@@ -147,7 +147,7 @@ export class AuthService {
         },
         {
           secret: 'at-secret',
-          expiresIn: 60
+          expiresIn: 60 * 15
         }
       ),
 

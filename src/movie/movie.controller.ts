@@ -23,6 +23,15 @@ export class MovieController {
   markAsWatched(@Body() dto: MovieInteractionDto) {
   }
 
+  @Get('/rating/:id')
+  @HttpCode(HttpStatus.OK)
+  rating(
+    @GetCurrentUserId() userId: number,
+    @Param('id') movieId: number
+  ): Promise<number> {
+    return this.movieService.getRating(userId, Number(movieId));
+  }
+
   @Get('/iswatched/:id')
   @HttpCode(HttpStatus.OK)
   isWatched(

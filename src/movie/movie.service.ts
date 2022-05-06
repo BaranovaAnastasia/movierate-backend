@@ -21,6 +21,17 @@ export class MovieService {
     return this.getStats(dto.movieId);
   }
 
+  getRating(userId: number, movieId: number): Promise<number> {
+    return this.prismaService.userRatings.findUnique({
+      where: {
+        userRating: {
+          user_id: userId,
+          tmdb_id: movieId
+        }
+      }
+    }).then(result => result ? result.rating : null);
+  }
+
   async isWatched(userId: number, movieId: number): Promise<boolean> {
     const watched = await this.prismaService.userWatched.findUnique({
       where: {

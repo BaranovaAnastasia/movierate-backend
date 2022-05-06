@@ -1,8 +1,8 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
-import { map } from "rxjs";
+import { Genre } from "src/common/types";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Genre, TMBDMovie } from "./types";
+import { TMBDMovie } from "./types";
 
 const url = 'https://api.themoviedb.org/3/movie/';
 
