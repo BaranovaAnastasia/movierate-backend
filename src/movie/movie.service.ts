@@ -16,8 +16,22 @@ export class MovieService {
 
     const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
 
-    isFirstWatched && this.tmdbService.updateUserStats(userId, dto.movieId);
+    isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
 
+    return this.getStats(dto.movieId);
+  }
+
+  async watchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
+    const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
+    isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
+    
+    return this.getStats(dto.movieId);
+  }
+
+  async unwatchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
+    await this.removeUserRating(userId, dto);
+    await this.removeWatched(userId, dto.movieId);
+    this.tmdbService.updateUserStatsRemove(userId, dto.movieId);
     return this.getStats(dto.movieId);
   }
 
@@ -91,6 +105,16 @@ export class MovieService {
     });
   }
 
+  private async removeUserRating(userId: number, dto: MovieInteractionDto): Promise<void> {
+    await this.prismaService.userRatings.deleteMany({
+      where: {
+        user_id: userId,
+        tmdb_id: dto.movieId
+      }
+    });
+  }
+
+
   private async markAsWatched(userId: number, movieId: number): Promise<boolean> {
     const record = await this.prismaService.userWatched.findUnique({
       where: {
@@ -111,5 +135,14 @@ export class MovieService {
     });
 
     return true;
+  }
+
+  private async removeWatched(userId: number, movieId: number): Promise<void> {
+    await this.prismaService.userWatched.deleteMany({
+      where: {
+        user_id: userId,
+        tmdb_id: movieId
+      }
+    });
   }
 }

@@ -13,7 +13,7 @@ export class TMDBService {
     private httpService: HttpService
   ) { }
 
-  updateUserStats(userId: number, movieId: number) {
+  updateUserStatsAdd(userId: number, movieId: number) {
     this.httpService.get<TMBDMovie>(
       `${url}${movieId}?api_key=${process.env.TMDB_API_KEY}`
     ).subscribe(
@@ -22,13 +22,28 @@ export class TMDBService {
 
         movie.genres.forEach(genre => {
           this.createUserGenresStats(userId, genre).then(
-            () => this.updateUserGenresStats(userId, genre)
+            () => this.updateUserGenresStatsAdd(userId, genre)
           );
         });
 
         this.createUserMainStats(userId).then(
-          () => this.updateUserMainStats(userId, movie.runtime)
+          () => this.updateUserMainStatsAdd(userId, movie.runtime)
         );
+        
+      }
+    );
+  }
+
+  updateUserStatsRemove(userId: number, movieId: number) {
+    this.httpService.get<TMBDMovie>(
+      `${url}${movieId}?api_key=${process.env.TMDB_API_KEY}`
+    ).subscribe(
+      result => {
+        const movie = result.data;
+
+        movie.genres.forEach(genre => this.updateUserGenresStatsRemove(userId, genre));
+
+        this.updateUserMainStatsRemove(userId, movie.runtime)
         
       }
     );
@@ -51,7 +66,7 @@ export class TMDBService {
     });
   }
 
-  private async updateUserGenresStats(userId: number, genre: Genre) {
+  private async updateUserGenresStatsAdd(userId: number, genre: Genre) {
     await this.prismaService.userGenresStats.update({
       where: {
         userGenre: {
@@ -62,6 +77,22 @@ export class TMDBService {
       data: {
         movies_count: {
           increment: 1
+        }
+      }
+    });
+  }
+
+  private async updateUserGenresStatsRemove(userId: number, genre: Genre) {
+    await this.prismaService.userGenresStats.update({
+      where: {
+        userGenre: {
+          user_id: userId,
+          genre_id: genre.id
+        }
+      },
+      data: {
+        movies_count: {
+          decrement: 1
         }
       }
     });
@@ -79,7 +110,7 @@ export class TMDBService {
     });
   }
 
-  private async updateUserMainStats(userId: number, runtime: number) {
+  private async updateUserMainStatsAdd(userId: number, runtime: number) {
     await this.prismaService.userStats.update({
       where: {
         user_id: userId
@@ -90,6 +121,22 @@ export class TMDBService {
         },
         hours_count: {
           increment: runtime
+        }
+      }
+    });
+  }
+
+  private async updateUserMainStatsRemove(userId: number, runtime: number) {
+    await this.prismaService.userStats.update({
+      where: {
+        user_id: userId
+      },
+      data: {
+        movies_count: {
+          decrement: 1
+        },
+        hours_count: {
+          decrement: runtime
         }
       }
     });

@@ -20,7 +20,20 @@ export class MovieController {
 
   @Post('/watch')
   @HttpCode(HttpStatus.OK)
-  markAsWatched(@Body() dto: MovieInteractionDto) {
+  watchMovie(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: MovieInteractionDto
+  ): Promise<MovieStats>  {
+    return this.movieService.watchMovie(userId, dto);
+  }
+
+  @Post('/unwatch')
+  @HttpCode(HttpStatus.OK)
+  unwatchMovie(
+    @GetCurrentUserId() userId: number,
+    @Body() dto: MovieInteractionDto
+  ): Promise<MovieStats>  {
+    return this.movieService.unwatchMovie(userId, dto);
   }
 
   @Get('/rating/:id')
@@ -44,7 +57,7 @@ export class MovieController {
   @Public()
   @Get('/stats/:id')
   @HttpCode(HttpStatus.OK)
-  getUserById(@Param('id') id: number): Promise<MovieStats> {
+  getStats(@Param('id') id: number): Promise<MovieStats> {
     return this.movieService.getStats(Number(id));
   }
 
