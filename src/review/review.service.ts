@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { UserStats } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ReviewDto } from './dto';
 
@@ -36,6 +37,34 @@ export class ReviewService {
       }
     });
 
+    this.createUserStats(userId)
+      .then(() => this.updateUserStats(userId));
+
     return this.getReviews(dto.movie_id);
+  }
+
+  private createUserStats(userId: number): Promise<UserStats> {
+    return this.prismaService.userStats.upsert({
+      where: {
+        user_id: userId
+      },
+      create: {
+        user_id: userId
+      },
+      update: {}
+    })
+  }
+
+  private updateUserStats(userId: number): Promise<UserStats> {
+    return this.prismaService.userStats.update({
+      where: {
+        user_id: userId
+      },
+      data: {
+        reviews_count: {
+          increment: 1
+        }
+      }
+    })
   }
 }

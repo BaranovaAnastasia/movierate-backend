@@ -34,7 +34,7 @@ model UserStats {
   user_id Int  @unique
 
   movies_count  Int @default(0)
-  hours_count   Int @default(0)
+  minutes_count   Int @default(0)
   reviews_count Int @default(0)
 
   @@map("user_stats")

@@ -3,6 +3,8 @@ import { UserGenresStats, UserStats } from '@prisma/client';
 import { profile } from 'console';
 import { Profile } from 'src/common/types';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserTopEntry } from './dto';
+import { UserTopOption } from './types/user-top-option.type';
 
 @Injectable()
 export class UserService {
@@ -17,8 +19,8 @@ export class UserService {
       }
     });
 
-    if(!user) throw new ForbiddenException('User Not Found.');
-    
+    if (!user) throw new ForbiddenException('User Not Found.');
+
     return {
       id: user.id,
       name: user.name,
@@ -41,5 +43,62 @@ export class UserService {
         user_id: id
       }
     });
+  }
+
+  getUserTop(by: UserTopOption, limit: number): Promise<UserTopEntry[]> {
+    switch(by) {
+      case 'movies':
+        return this.getUserTopByMovies(limit);
+      case 'minutes':
+        return this.getUserTopByMinutes(limit);
+      case 'reviews':
+        return this.getUserTopByReviews(limit);
+    }
+  }
+
+  private getUserTopByMovies(limit: number): Promise<UserTopEntry[]> {
+    return this.prismaService.$queryRaw`
+      SELECT
+        users.id,
+        users.name,
+        users.avatar_path,
+        user_stats.movies_count,
+        user_stats.minutes_count,
+        user_stats.reviews_count
+      FROM user_stats
+      INNER JOIN users ON user_stats.user_id = users.id
+      ORDER BY user_stats.movies_count DESC
+      LIMIT ${Number(limit)};
+    `;
+  }
+  private getUserTopByMinutes(limit: number): Promise<UserTopEntry[]> {
+    return this.prismaService.$queryRaw`
+      SELECT
+        users.id,
+        users.name,
+        users.avatar_path,
+        user_stats.movies_count,
+        user_stats.minutes_count,
+        user_stats.reviews_count
+      FROM user_stats
+      INNER JOIN users ON user_stats.user_id = users.id
+      ORDER BY user_stats.minutes_count DESC
+      LIMIT ${Number(limit)};
+    `;
+  }
+  private getUserTopByReviews(limit: number): Promise<UserTopEntry[]> {
+    return this.prismaService.$queryRaw`
+      SELECT
+        users.id,
+        users.name,
+        users.avatar_path,
+        user_stats.movies_count,
+        user_stats.minutes_count,
+        user_stats.reviews_count
+      FROM user_stats
+      INNER JOIN users ON user_stats.user_id = users.id
+      ORDER BY user_stats.reviews_count DESC
+      LIMIT ${Number(limit)};
+    `;
   }
 }

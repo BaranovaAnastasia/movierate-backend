@@ -1,20 +1,14 @@
-import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, Query } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
 import { Public } from 'src/common/decorators';
 import { Profile } from 'src/common/types';
+import { UserTopEntry } from './dto';
 import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
 
   constructor(private userService: UserService) { }
-
-  @Public()
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  getUserById(@Param('id') id: number): Promise<Profile> {
-    return this.userService.getUserById(Number(id));
-  }
 
   @Public()
   @Get('stats/:id')
@@ -28,5 +22,19 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   getUserGenresStats(@Param('id') id: number): Promise<UserGenresStats[]> {
     return this.userService.getUserGenresStats(Number(id));
+  }
+
+  @Public()
+  @Get('top')
+  @HttpCode(HttpStatus.OK)
+  getUserTop(@Query() query): Promise<UserTopEntry[]> {
+    return this.userService.getUserTop(query.by, query.limit);
+  }
+
+  @Public()
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  getUserById(@Param('id') id: number): Promise<Profile> {
+    return this.userService.getUserById(Number(id));
   }
 }

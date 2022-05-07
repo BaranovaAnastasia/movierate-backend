@@ -119,7 +119,7 @@ export class TMDBService {
         movies_count: {
           increment: 1
         },
-        hours_count: {
+        minutes_count: {
           increment: runtime
         }
       }
@@ -135,7 +135,7 @@ export class TMDBService {
         movies_count: {
           decrement: 1
         },
-        hours_count: {
+        minutes_count: {
           decrement: runtime
         }
       }
