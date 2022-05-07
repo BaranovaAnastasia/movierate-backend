@@ -26,6 +26,7 @@ model User {
   UserGenresStats UserGenresStats[]
   UserRatings     UserRatings[]
   UserWatched     UserWatched[]
+  Review          Review[]
 }
 
 model UserStats {
@@ -70,4 +71,19 @@ model UserWatched {
 
   @@map("user_watched")
   @@unique([user_id, tmdb_id], name: "userWatched")
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+  tmdb_id Int
+
+  rating  Int
+  title   String
+  review  String
+
+  @@map("review")
 }
