@@ -27,6 +27,7 @@ model User {
   UserRatings     UserRatings[]
   UserWatched     UserWatched[]
   Review          Review[]
+  MoviesList      MoviesList[]
 }
 
 model UserStats {
@@ -86,4 +87,27 @@ model Review {
   review  String
 
   @@map("review")
+}
+
+model MoviesList {
+  id        Int      @id @default(autoincrement())
+
+  user      User @relation(fields: [user_id], references: [id])
+  user_id   Int
+  list_name String
+  is_public Boolean
+
+  @@map("movies_list")
+  @@unique([user_id, list_name], name: "userList")
+
+  MovieInList MovieInList[]
+}
+
+model MovieInList {
+  list    MoviesList @relation(fields: [list_id], references: [id])
+  list_id Int 
+  tmdb_id String
+
+  @@map("movie_in_list")
+  @@unique([list_id, tmdb_id], name: "movieInList")
 }

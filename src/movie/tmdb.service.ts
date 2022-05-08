@@ -1,10 +1,12 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
+import { firstValueFrom, map, Observable } from "rxjs";
 import { Genre } from "src/common/types";
 import { PrismaService } from "src/prisma/prisma.service";
-import { TMBDMovie } from "./types";
+import { Movie, TMBDMovie } from "./types";
 
 const url = 'https://api.themoviedb.org/3/movie/';
+const posterUrl = 'https://image.tmdb.org/t/p/w1280';
 
 @Injectable()
 export class TMDBService {
@@ -29,7 +31,7 @@ export class TMDBService {
         this.createUserMainStats(userId).then(
           () => this.updateUserMainStatsAdd(userId, movie.runtime)
         );
-        
+
       }
     );
   }
@@ -44,8 +46,26 @@ export class TMDBService {
         movie.genres.forEach(genre => this.updateUserGenresStatsRemove(userId, genre));
 
         this.updateUserMainStatsRemove(userId, movie.runtime)
-        
+
       }
+    );
+  }
+
+  getMovie(movieId: string): Promise<Movie> {
+    return firstValueFrom(
+      this.httpService.get<TMBDMovie>(
+        `${url}${movieId}?api_key=${process.env.TMDB_API_KEY}`
+      ).pipe(
+        map(result => result.data),
+        map(result => {
+          return {
+            id: movieId,
+            title: result.title,
+            release_date: result.release_date,
+            poster_path: result.poster_path ? `${posterUrl}${result.poster_path}` : undefined
+          }
+        })
+      )
     );
   }
 

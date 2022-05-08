@@ -61,4 +61,11 @@ export class MovieController {
     return this.movieService.getStats(id);
   }
 
+  @Public()
+  @Get('/top')
+  @HttpCode(HttpStatus.OK)
+  getTopRatedMovies(): Promise<any> {
+    return this.movieService.getTopRatedMovies();
+  }
+
 }

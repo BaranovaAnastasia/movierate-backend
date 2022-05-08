@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MovieInteractionDto } from './dto';
 import { TMDBService } from './tmdb.service';
-import { MovieStats } from './types';
+import { Movie, MovieStats } from './types';
+
+type MovieRating = { tmdb_id: string, vote_average: number };
 
 @Injectable()
 export class MovieService {
@@ -24,7 +26,7 @@ export class MovieService {
   async watchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
     const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
     isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
-    
+
     return this.getStats(dto.movieId);
   }
 
@@ -144,5 +146,26 @@ export class MovieService {
         tmdb_id: movieId
       }
     });
+  }
+
+  async getTopRatedMovies(): Promise<Movie[]> {
+    const avg: MovieRating[] = await this.prismaService.$queryRaw`
+      SELECT
+        tmdb_id,
+        AVG(rating) AS vote_average
+      FROM user_ratings
+      GROUP BY tmdb_id
+      ORDER BY vote_average DESC;
+    `;
+
+    return Promise.all(
+      avg.map(mr =>
+        this.tmdbService.getMovie(mr.tmdb_id)
+          .then(movie => Object.assign(movie, {
+            id: mr.tmdb_id,
+            vote_average: mr.vote_average
+          }))
+      )
+    );
   }
 }

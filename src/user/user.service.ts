@@ -1,6 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
-import { profile } from 'console';
 import { Profile } from 'src/common/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserTopEntry } from './dto';
