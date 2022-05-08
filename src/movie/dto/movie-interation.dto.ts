@@ -7,7 +7,7 @@ export class MovieInteractionDto {
 
   @IsOptional()
   @IsNumber()
-  @Max(5)
   @Min(1)
+  @Max(10)
   rating?: number;
 }
