@@ -1,5 +1,5 @@
 export type MovieStats = {
-  movieId: number,
+  movieId: string,
   voteAvg: number,
   voteCount: number,
   watched: number

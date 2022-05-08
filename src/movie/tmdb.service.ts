@@ -13,7 +13,7 @@ export class TMDBService {
     private httpService: HttpService
   ) { }
 
-  updateUserStatsAdd(userId: number, movieId: number) {
+  updateUserStatsAdd(userId: number, movieId: string) {
     this.httpService.get<TMBDMovie>(
       `${url}${movieId}?api_key=${process.env.TMDB_API_KEY}`
     ).subscribe(
@@ -34,7 +34,7 @@ export class TMDBService {
     );
   }
 
-  updateUserStatsRemove(userId: number, movieId: number) {
+  updateUserStatsRemove(userId: number, movieId: string) {
     this.httpService.get<TMBDMovie>(
       `${url}${movieId}?api_key=${process.env.TMDB_API_KEY}`
     ).subscribe(

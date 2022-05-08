@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class MovieInteractionDto {
   @IsNotEmpty()
-  @IsNumber()
-  movieId: number;
+  @IsString()
+  movieId: string;
 
   @IsOptional()
   @IsNumber()

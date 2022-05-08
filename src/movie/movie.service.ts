@@ -35,7 +35,7 @@ export class MovieService {
     return this.getStats(dto.movieId);
   }
 
-  getRating(userId: number, movieId: number): Promise<number> {
+  getRating(userId: number, movieId: string): Promise<number> {
     return this.prismaService.userRatings.findUnique({
       where: {
         userRating: {
@@ -46,7 +46,7 @@ export class MovieService {
     }).then(result => result ? result.rating : null);
   }
 
-  async isWatched(userId: number, movieId: number): Promise<boolean> {
+  async isWatched(userId: number, movieId: string): Promise<boolean> {
     const watched = await this.prismaService.userWatched.findUnique({
       where: {
         userWatched: {
@@ -59,7 +59,7 @@ export class MovieService {
     return watched !== null;
   }
 
-  async getStats(movieId: number): Promise<MovieStats> {
+  async getStats(movieId: string): Promise<MovieStats> {
     const avg = await this.prismaService.userRatings.aggregate({
       _avg: {
         rating: true
@@ -115,7 +115,7 @@ export class MovieService {
   }
 
 
-  private async markAsWatched(userId: number, movieId: number): Promise<boolean> {
+  private async markAsWatched(userId: number, movieId: string): Promise<boolean> {
     const record = await this.prismaService.userWatched.findUnique({
       where: {
         userWatched: {
@@ -137,7 +137,7 @@ export class MovieService {
     return true;
   }
 
-  private async removeWatched(userId: number, movieId: number): Promise<void> {
+  private async removeWatched(userId: number, movieId: string): Promise<void> {
     await this.prismaService.userWatched.deleteMany({
       where: {
         user_id: userId,

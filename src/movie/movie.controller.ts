@@ -40,25 +40,25 @@ export class MovieController {
   @HttpCode(HttpStatus.OK)
   rating(
     @GetCurrentUserId() userId: number,
-    @Param('id') movieId: number
+    @Param('id') movieId: string
   ): Promise<number> {
-    return this.movieService.getRating(userId, Number(movieId));
+    return this.movieService.getRating(userId, movieId);
   }
 
   @Get('/iswatched/:id')
   @HttpCode(HttpStatus.OK)
   isWatched(
     @GetCurrentUserId() userId: number,
-    @Param('id') movieId: number
+    @Param('id') movieId: string
   ): Promise<boolean> {
-    return this.movieService.isWatched(userId, Number(movieId));
+    return this.movieService.isWatched(userId, movieId);
   }
 
   @Public()
   @Get('/stats/:id')
   @HttpCode(HttpStatus.OK)
-  getStats(@Param('id') id: number): Promise<MovieStats> {
-    return this.movieService.getStats(Number(id));
+  getStats(@Param('id') id: string): Promise<MovieStats> {
+    return this.movieService.getStats(id);
   }
 
 }

@@ -3,7 +3,8 @@ import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class ReviewDto {
   @IsNotEmpty()
-  movie_id: number;
+  @IsString()
+  movie_id: string;
 
   @IsNotEmpty()
   @IsNumber()

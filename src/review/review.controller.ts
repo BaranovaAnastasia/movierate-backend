@@ -12,8 +12,8 @@ export class ReviewController {
   @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getReviews(@Param('id') id: number): Promise<ReviewDto[]> {
-    return this.reviewService.getReviews(Number(id));
+  getReviews(@Param('id') id: string): Promise<ReviewDto[]> {
+    return this.reviewService.getReviews(id);
   }
 
   @Post()

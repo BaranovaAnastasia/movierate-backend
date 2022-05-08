@@ -9,7 +9,7 @@ export class ReviewService {
     private prismaService: PrismaService
   ) { }
 
-  getReviews(movieId: number): Promise<ReviewDto[]> {
+  getReviews(movieId: string): Promise<ReviewDto[]> {
     return this.prismaService.$queryRaw`
       SELECT
         review.user_id user_id,

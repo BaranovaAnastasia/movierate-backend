@@ -57,7 +57,7 @@ model UserGenresStats {
 model UserRatings {
   user    User @relation(fields: [user_id], references: [id])
   user_id Int
-  tmdb_id Int
+  tmdb_id String
   rating  Int
 
   @@map("user_ratings")
@@ -67,7 +67,7 @@ model UserRatings {
 model UserWatched {
   user    User @relation(fields: [user_id], references: [id])
   user_id Int
-  tmdb_id Int
+  tmdb_id String
 
   @@map("user_watched")
   @@unique([user_id, tmdb_id], name: "userWatched")
@@ -79,7 +79,7 @@ model Review {
 
   user    User @relation(fields: [user_id], references: [id])
   user_id Int
-  tmdb_id Int
+  tmdb_id String
 
   rating  Int
   title   String
