@@ -1,5 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { GetCurrentUserId, Public } from 'src/common/decorators';
+import { Movie } from 'src/common/types';
 import { MovieInteractionDto } from './dto';
 import { MovieService } from './movie.service';
 import { MovieStats } from './types';
@@ -64,7 +65,7 @@ export class MovieController {
   @Public()
   @Get('/top')
   @HttpCode(HttpStatus.OK)
-  getTopRatedMovies(): Promise<any> {
+  getTopRatedMovies(): Promise<Movie[]> {
     return this.movieService.getTopRatedMovies();
   }
 

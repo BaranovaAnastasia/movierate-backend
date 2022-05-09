@@ -1,8 +1,8 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { TMDBService } from 'src/common/services';
 import { MovieController } from './movie.controller';
 import { MovieService } from './movie.service';
-import { TMDBService } from './tmdb.service';
 
 @Module({
   imports: [HttpModule],

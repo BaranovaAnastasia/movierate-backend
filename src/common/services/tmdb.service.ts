@@ -1,9 +1,8 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable } from "@nestjs/common";
 import { firstValueFrom, map, Observable } from "rxjs";
-import { Genre } from "src/common/types";
+import { Genre, Movie, TMBDMovie } from "src/common/types";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Movie, TMBDMovie } from "./types";
 
 const url = 'https://api.themoviedb.org/3/movie/';
 const posterUrl = 'https://image.tmdb.org/t/p/w1280';

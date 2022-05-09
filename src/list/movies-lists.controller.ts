@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { GetCurrentUserId, Public } from 'src/common/decorators';
-import { ListMovieDto, MoviesListDto } from './dto';
+import { FavouriteDto, ListMovieDto, MoviesListDto } from './dto';
 import { MoviesListsService } from './movies-lists.service';
 import { MoviesList } from './types';
 
@@ -10,41 +10,37 @@ export class MoviesListsController {
     private moviesListsService: MoviesListsService
   ) { }
 
-  @Post('create')
+  @Post('favourite')
   @HttpCode(HttpStatus.OK)
-  createList(
+  addMovieToFavourites(
     @GetCurrentUserId() userId: number,
-    @Body() dto: MoviesListDto
-  ): Promise<MoviesList> {
-    return this.moviesListsService.createList(userId, dto);
+    @Body() dto: FavouriteDto
+  ): Promise<void> {
+    return this.moviesListsService.addMovieToFavourites(userId, dto);
   }
 
-  @Post('add')
+  @Delete('favourite/:id')
   @HttpCode(HttpStatus.OK)
-  addMovieToList(
+  removeMovieFromFavourites(
     @GetCurrentUserId() userId: number,
-    @Body() dto: ListMovieDto
-  ): Promise<MoviesList> {
-    return this.moviesListsService.addMovieToList(userId, dto);
-  }
-
-  @Public()
-  @Get()
-  @HttpCode(HttpStatus.OK)
-  getList(
-    @GetCurrentUserId() userId: number,
-    @Query() query
-  ): Promise<MoviesList> {
-    return this.moviesListsService.getList(Number(query.list_id), userId);
+    @Param('id') movieId: string
+  ): Promise<void> {
+    return this.moviesListsService.removeMovieFromFavourites(userId, movieId);
   }
 
   @Public()
-  @Get('user/:id')
+  @Get('favourite/:id')
   @HttpCode(HttpStatus.OK)
-  getAllUserLists(
-    @GetCurrentUserId() currentUserId: number,
-    @Param() id: number
-  ): Promise<MoviesList[]> {
-    return this.moviesListsService.getAllUserLists(id, currentUserId);
+  getFavourites(@Param('id') userId: number): Promise<MoviesList> {
+    return this.moviesListsService.getFavourites(Number(userId));
+  }
+
+  @Get('isfavourite/:id')
+  @HttpCode(HttpStatus.OK)
+  isFavourite(
+    @GetCurrentUserId() userId: number,
+    @Param('id') movieId: any
+  ): Promise<boolean> {
+    return this.moviesListsService.isFavourite(userId, movieId);
   }
 }

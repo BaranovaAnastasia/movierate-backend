@@ -1,7 +1,9 @@
+import { Movie } from "src/common/types";
+
 export type MoviesList = {
   userId: number;
-  listId: number;
+  listId?: number;
   listName: string;
-  isPublic: boolean;
-  moviesIds: string[];
+  isPublic?: boolean;
+  movies: Movie[];
 }

@@ -28,6 +28,7 @@ model User {
   UserWatched     UserWatched[]
   Review          Review[]
   MoviesList      MoviesList[]
+  Favourites      Favourites[]
 }
 
 model UserStats {
@@ -110,4 +111,13 @@ model MovieInList {
 
   @@map("movie_in_list")
   @@unique([list_id, tmdb_id], name: "movieInList")
+}
+
+model Favourites {
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+  tmdb_id String
+
+  @@map("favourites")
+  @@unique([user_id, tmdb_id], name: "userFavourite")
 }

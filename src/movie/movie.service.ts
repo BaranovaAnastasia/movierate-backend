@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MovieInteractionDto } from './dto';
-import { TMDBService } from './tmdb.service';
-import { Movie, MovieStats } from './types';
+import { TMDBService } from '../common/services';
+import { MovieStats } from './types';
+import { Movie } from 'src/common/types';
 
 type MovieRating = { tmdb_id: string, vote_average: number };
 
@@ -162,7 +163,6 @@ export class MovieService {
       avg.map(mr =>
         this.tmdbService.getMovie(mr.tmdb_id)
           .then(movie => Object.assign(movie, {
-            id: mr.tmdb_id,
             vote_average: mr.vote_average
           }))
       )

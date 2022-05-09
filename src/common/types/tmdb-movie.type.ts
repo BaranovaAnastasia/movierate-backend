@@ -5,6 +5,6 @@ export type TMBDMovie = {
   title: string,
   release_date: Date,
   poster_path: string,
-  runtime: number,
-  genres: Genre[]
+  runtime?: number,
+  genres?: Genre[]
 }
