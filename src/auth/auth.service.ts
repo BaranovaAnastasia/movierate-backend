@@ -18,10 +18,11 @@ export class AuthService {
 
   async signupLocal(dto: AuthDto): Promise<Tokens> {
     const hash = await this.getHash(dto.password);
+    const email = dto.email.toLowerCase();
 
     const duplicate = await this.prismaService.user.findUnique({
       where: {
-        email: dto.email
+        email: email
       }
     });
 
@@ -30,8 +31,8 @@ export class AuthService {
     const newUser = await this.prismaService.user.create({
       data: {
         name: dto.name,
-        email: dto.email,
-        avatar_path: `${defaultAvatarPath}${md5(dto.email)}?f=y&d=identicon`,
+        email: email,
+        avatar_path: `${defaultAvatarPath}${md5(email)}?f=y&d=identicon`,
         hash
       }
     });
@@ -44,9 +45,11 @@ export class AuthService {
   }
 
   async signinLocal(dto: AuthDto): Promise<Tokens> {
+    const email = dto.email.toLowerCase();
+
     const user = await this.prismaService.user.findUnique({
       where: {
-        email: dto.email
+        email: email
       }
     });
 

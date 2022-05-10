@@ -1,4 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { Observable } from 'rxjs';
 import { TMDBService } from 'src/common/services';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ListMovieDto, MoviesListDto } from './dto';
@@ -72,6 +74,31 @@ export class MoviesListsService {
     });
   }
 
+  async removeMovieFromList(userId: number, dto: ListMovieDto): Promise<void> {
+    const list = await this.prismaService.moviesList.findUnique({
+      where: {
+        id: dto.listId
+      }
+    });
+
+    if (!list) {
+      throw new NotFoundException('List Not Found.');
+    }
+
+    if (list.user_id !== userId) {
+      throw new ForbiddenException('Access Denied.');
+    }
+
+    await this.prismaService.movieInList.delete({
+      where: {
+        movieInList: {
+          list_id: dto.listId,
+          tmdb_id: dto.movieId
+        }
+      }
+    });
+  }
+
   async getList(listId: number, currentUserId: number): Promise<MoviesList> {
     const list = await this.prismaService.moviesList.findUnique({
       where: { id: listId }
@@ -106,13 +133,15 @@ export class MoviesListsService {
     return this.prismaService.moviesList.findMany({
       where: {
         user_id: userId
+      },
+      orderBy: {
+        created_at: 'desc'
       }
     })
       .then(
-        results => results.filter(list => list.is_public || list.user_id === currentUserId)
-      )
-      .then(
-        results => results.sort((a, b) => a.created_at.getTime() - b.created_at.getTime())
+        results => results.filter(
+          list => list.is_public || list.user_id === currentUserId
+        )
       )
       .then(
         results => results.map(list => {
@@ -124,5 +153,41 @@ export class MoviesListsService {
           }
         })
       );
+  }
+
+  async editList(userId: number, listId: number, dto: MoviesListDto): Promise<void> {
+    try {
+      await this.prismaService.moviesList.updateMany({
+        where: {
+          id: listId,
+          user_id: userId
+        },
+        data: {
+          list_name: dto.listName,
+          is_public: dto.isPublic
+        }
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException(`List '${dto.listName}' already exists`);
+        }
+      }
+    }
+  }
+
+  async deleteList(userId: number, listId: number): Promise<void> {
+    await this.prismaService.movieInList.deleteMany({
+      where: {
+        list_id: listId
+      }
+    });
+    
+    await this.prismaService.moviesList.deleteMany({
+      where: {
+        id: listId,
+        user_id: userId
+      }
+    });
   }
 }

@@ -37,21 +37,25 @@ export class MovieController {
     return this.movieService.unwatchMovie(userId, dto);
   }
 
+  @Public()
   @Get('/rating/:id')
   @HttpCode(HttpStatus.OK)
   rating(
     @GetCurrentUserId() userId: number,
     @Param('id') movieId: string
   ): Promise<number> {
+    if(!userId) return undefined;
     return this.movieService.getRating(userId, movieId);
   }
 
+  @Public()
   @Get('/iswatched/:id')
   @HttpCode(HttpStatus.OK)
   isWatched(
     @GetCurrentUserId() userId: number,
     @Param('id') movieId: string
   ): Promise<boolean> {
+    if(!userId) return undefined;
     return this.movieService.isWatched(userId, movieId);
   }
 
