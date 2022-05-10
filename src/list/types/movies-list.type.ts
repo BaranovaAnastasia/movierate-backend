@@ -5,5 +5,5 @@ export type MoviesList = {
   listId?: number;
   listName: string;
   isPublic?: boolean;
-  movies: Movie[];
+  movies?: Movie[];
 }

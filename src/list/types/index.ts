@@ -1,1 +1,1 @@
-export * from './movies-list.type'
+export * from './movies-list.type';
