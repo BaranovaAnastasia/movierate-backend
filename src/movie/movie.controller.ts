@@ -49,21 +49,13 @@ export class MovieController {
   }
 
   @Public()
-  @Get('/iswatched/:id')
-  @HttpCode(HttpStatus.OK)
-  isWatched(
-    @GetCurrentUserId() userId: number,
-    @Param('id') movieId: string
-  ): Promise<boolean> {
-    if(!userId) return undefined;
-    return this.movieService.isWatched(userId, movieId);
-  }
-
-  @Public()
   @Get('/stats/:id')
   @HttpCode(HttpStatus.OK)
-  getStats(@Param('id') id: string): Promise<MovieStats> {
-    return this.movieService.getStats(id);
+  getStats(
+    @GetCurrentUserId() userId: number,
+    @Param('id') id: string
+  ): Promise<MovieStats> {
+    return this.movieService.getStats(id, userId);
   }
 
   @Public()

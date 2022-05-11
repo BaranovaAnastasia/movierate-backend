@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
+import { Observable } from 'rxjs';
 import { Profile } from 'src/common/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserTopEntry } from './dto';
@@ -53,6 +54,33 @@ export class UserService {
       case 'reviews':
         return this.getUserTopByReviews(limit);
     }
+  }
+
+  async follow(followerId: number, followingId: number): Promise<void> {
+    await this.prismaService.follows.upsert({
+      where: {
+        follow: {
+          follower_id: followerId,
+          following_id: followingId
+        }
+      },
+      create: {
+        follower_id: followerId,
+        following_id: followingId
+      },
+      update: { }
+    });
+  }
+
+  async unfollow(followerId: number, followingId: number): Promise<void> {
+    await this.prismaService.follows.delete({
+      where: {
+        follow: {
+          follower_id: followerId,
+          following_id: followingId
+        }
+      }
+    });
   }
 
   private getUserTopByMovies(limit: number): Promise<UserTopEntry[]> {

@@ -21,24 +21,26 @@ export class MovieService {
 
     isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
 
-    return this.getStats(dto.movieId);
+    return this.getStats(dto.movieId, userId);
   }
 
   async watchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
     const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
     isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
 
-    return this.getStats(dto.movieId);
+    return this.getStats(dto.movieId, userId);
   }
 
   async unwatchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
     await this.removeUserRating(userId, dto);
     await this.removeWatched(userId, dto.movieId);
     this.tmdbService.updateUserStatsRemove(userId, dto.movieId);
-    return this.getStats(dto.movieId);
+    return this.getStats(dto.movieId, userId);
   }
 
   getRating(userId: number, movieId: string): Promise<number> {
+    if (!userId) return undefined;
+    
     return this.prismaService.userRatings.findUnique({
       where: {
         userRating: {
@@ -50,6 +52,8 @@ export class MovieService {
   }
 
   async isWatched(userId: number, movieId: string): Promise<boolean> {
+    if (!userId) return undefined;
+
     const watched = await this.prismaService.userWatched.findUnique({
       where: {
         userWatched: {
@@ -62,7 +66,7 @@ export class MovieService {
     return watched !== null;
   }
 
-  async getStats(movieId: string): Promise<MovieStats> {
+  async getStats(movieId: string, currentUserId: number): Promise<MovieStats> {
     const avg = await this.prismaService.userRatings.aggregate({
       _avg: {
         rating: true
@@ -85,7 +89,11 @@ export class MovieService {
       movieId: movieId,
       voteAvg: avg._avg.rating === null ? 0 : avg._avg.rating,
       voteCount: avg._count.user_id,
-      watched: watched
+      watched: watched,
+
+      currentRating: await this.getRating(currentUserId, movieId),
+      isWatched: await this.isWatched(currentUserId, movieId),
+      isFavourite: await this.isFavourite(currentUserId, movieId)
     }
   }
 
@@ -167,5 +175,20 @@ export class MovieService {
           }))
       )
     );
+  }
+
+  private async isFavourite(userId: number, movieId: string): Promise<boolean> {
+    if (!userId) return undefined;
+
+    const record = await this.prismaService.favourites.findUnique({
+      where: {
+        userFavourite: {
+          user_id: userId,
+          tmdb_id: movieId
+        }
+      }
+    });
+
+    return record !== null;
   }
 }

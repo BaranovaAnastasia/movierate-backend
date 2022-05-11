@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
 import { Public } from 'src/common/decorators';
 import { Profile } from 'src/common/types';

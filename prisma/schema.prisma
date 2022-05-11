@@ -29,6 +29,8 @@ model User {
   Review          Review[]
   MoviesList      MoviesList[]
   Favourites      Favourites[]
+  follower        Follows[] @relation("follower")
+  following       Follows[] @relation("following")
 }
 
 model UserStats {
@@ -121,4 +123,15 @@ model Favourites {
 
   @@map("favourites")
   @@unique([user_id, tmdb_id], name: "userFavourite")
+}
+
+model Follows {
+  follower    User @relation(name: "follower", fields: [follower_id], references: [id])
+  follower_id Int
+
+  following    User @relation(name: "following", fields: [following_id], references: [id])
+  following_id Int
+
+  @@map("follows")
+  @@unique([follower_id, following_id], name: "follow")
 }

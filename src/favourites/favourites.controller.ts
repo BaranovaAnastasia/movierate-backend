@@ -34,15 +34,4 @@ export class FavouritesController {
   getFavourites(@Param('id') userId: number): Promise<Movie[]> {
     return this.favouritesService.getFavourites(Number(userId));
   }
-
-  @Public()
-  @Get('isfavourite/:id')
-  @HttpCode(HttpStatus.OK)
-  isFavourite(
-    @GetCurrentUserId() userId: number,
-    @Param('id') movieId: any
-  ): Promise<boolean> {
-    if(!userId) return undefined;
-    return this.favouritesService.isFavourite(userId, movieId);
-  }
 }
