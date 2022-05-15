@@ -33,7 +33,8 @@ export class MovieService {
         AVG(rating) AS vote_average
       FROM user_ratings
       GROUP BY tmdb_id
-      ORDER BY vote_average DESC;
+      ORDER BY vote_average DESC
+      LIMIT 10;
     `;
 
     return Promise.all(
