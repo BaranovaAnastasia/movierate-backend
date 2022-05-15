@@ -32,7 +32,7 @@ export class AuthService {
       data: {
         name: dto.name,
         email: email,
-        avatar_path: `${defaultAvatarPath}${md5(email)}.svg?text=${dto.name.split(' ').slice(0, 2).map((n) => n[0]).join()}`,
+        avatar_path: `${defaultAvatarPath}${md5(email)}.svg?text=${dto.name.split(' ').slice(0, 2).map((n) => n[0]).join('')}`,
         hash
       }
     });
