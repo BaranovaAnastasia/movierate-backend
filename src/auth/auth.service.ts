@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Profile, Tokens } from 'src/common/types';
 import { UserStats } from '@prisma/client';
 
-const defaultAvatarPath = 'https://www.gravatar.com/avatar/';
+const defaultAvatarPath = 'https://avatar.tobi.sh/';
 
 @Injectable()
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
       data: {
         name: dto.name,
         email: email,
-        avatar_path: `${defaultAvatarPath}${md5(email)}?f=y&d=identicon`,
+        avatar_path: `${defaultAvatarPath}${md5(email)}.svg?text=${dto.name.split(' ').slice(0, 2).map((n) => n[0]).join()}`,
         hash
       }
     });
@@ -113,7 +113,7 @@ export class AuthService {
       }
     });
 
-    if(!user) throw new ForbiddenException('The user does not exist.');
+    if (!user) throw new ForbiddenException('The user does not exist.');
 
     return {
       id: user.id,
