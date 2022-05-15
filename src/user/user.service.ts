@@ -57,7 +57,7 @@ export class UserService {
     }
   }
 
-  async follow(followerId: number, followingId: number): Promise<Profile[]> {
+  async follow(followerId: number, followingId: number): Promise<void> {
     await this.prismaService.follows.upsert({
       where: {
         follow: {
@@ -71,11 +71,9 @@ export class UserService {
       },
       update: {}
     });
-
-    return this.getAllFollowedBy(followingId);
   }
 
-  async unfollow(followerId: number, followingId: number): Promise<Profile[]> {
+  async unfollow(followerId: number, followingId: number): Promise<void> {
     await this.prismaService.follows.delete({
       where: {
         follow: {
@@ -84,8 +82,6 @@ export class UserService {
         }
       }
     });
-
-    return this.getAllFollowedBy(followingId);
   }
 
   async isFollowed(followerId: number, followingId: number): Promise<boolean> {

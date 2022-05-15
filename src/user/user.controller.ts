@@ -46,7 +46,7 @@ export class UserController {
   followUser(
     @GetCurrentUserId() currentUserId: number,
     @Param('id') id: number
-  ): Promise<Profile[]> {
+  ): Promise<void> {
     return this.userService.follow(currentUserId, Number(id));
   }
 
@@ -55,7 +55,7 @@ export class UserController {
   unfollowUser(
     @GetCurrentUserId() currentUserId: number,
     @Param('id') id: number
-  ): Promise<Profile[]> {
+  ): Promise<void> {
     return this.userService.unfollow(currentUserId, Number(id));
   }
 

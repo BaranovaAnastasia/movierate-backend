@@ -9,6 +9,12 @@ import { UserStats } from '@prisma/client';
 
 const defaultAvatarPath = 'https://avatar.tobi.sh/';
 
+function getInitials(name: string): string {
+  const words = name.split(' ');
+  if (words.length < 2) return '';
+  return words.slice(0, 2).map((n) => n[0]).join('');
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -32,7 +38,7 @@ export class AuthService {
       data: {
         name: dto.name,
         email: email,
-        avatar_path: `${defaultAvatarPath}${md5(email)}.svg?text=${dto.name.split(' ').slice(0, 2).map((n) => n[0]).join('')}`,
+        avatar_path: `${defaultAvatarPath}${md5(email)}.svg?text=${getInitials(dto.name)}`,
         hash
       }
     });
