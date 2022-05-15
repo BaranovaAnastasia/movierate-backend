@@ -59,19 +59,24 @@ model UserGenresStats {
 }
 
 model UserRatings {
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
-  tmdb_id String
-  rating  Int
+  created_at DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user       User @relation(fields: [user_id], references: [id])
+  user_id    Int
+  tmdb_id    String
+  rating     Int
 
   @@map("user_ratings")
   @@unique([user_id, tmdb_id], name: "userRating")
 }
 
 model UserWatched {
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
-  tmdb_id String
+  created_at DateTime @default(now())
+  
+  user       User @relation(fields: [user_id], references: [id])
+  user_id    Int
+  tmdb_id    String
 
   @@map("user_watched")
   @@unique([user_id, tmdb_id], name: "userWatched")
@@ -117,9 +122,11 @@ model MovieInList {
 }
 
 model Favourites {
-  user    User @relation(fields: [user_id], references: [id])
-  user_id Int
-  tmdb_id String
+  created_at DateTime @default(now())
+
+  user       User @relation(fields: [user_id], references: [id])
+  user_id    Int
+  tmdb_id    String
 
   @@map("favourites")
   @@unique([user_id, tmdb_id], name: "userFavourite")

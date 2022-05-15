@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { GetCurrentUserId, Public } from 'src/common/decorators';
-import { Movie } from 'src/common/types';
+import { Movie, MovieStats } from 'src/common/types';
 import { FavouriteDto } from './dto';
 import { FavouritesService } from './favourites.service';
 
@@ -15,7 +15,7 @@ export class FavouritesController {
   addMovieToFavourites(
     @GetCurrentUserId() userId: number,
     @Body() dto: FavouriteDto
-  ): Promise<void> {
+  ): Promise<MovieStats> {
     return this.favouritesService.addMovieToFavourites(userId, dto.movieId);
   }
 
@@ -24,7 +24,7 @@ export class FavouritesController {
   removeMovieFromFavourites(
     @GetCurrentUserId() userId: number,
     @Param('id') movieId: string
-  ): Promise<void> {
+  ): Promise<MovieStats> {
     return this.favouritesService.removeMovieFromFavourites(userId, movieId);
   }
 

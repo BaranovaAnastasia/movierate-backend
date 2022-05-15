@@ -2,14 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { MovieInteractionDto } from './dto';
 import { TMDBService } from '../common/services';
-import { MovieStats } from './types';
-import { Movie } from 'src/common/types';
+import { Movie, MovieStats } from 'src/common/types';
+import { CommonService } from 'src/common/services';
 
 type MovieRating = { tmdb_id: string, vote_average: number };
 
 @Injectable()
 export class MovieService {
   constructor(
+    private CommonService: CommonService,
     private prismaService: PrismaService,
     private tmdbService: TMDBService
   ) { }
@@ -17,84 +18,32 @@ export class MovieService {
   async rateMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
     await this.upsertUserRating(userId, dto);
 
-    const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
+    const isFirstWatched = await this.CommonService.markAsWatched(userId, dto.movieId);
 
     isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
 
-    return this.getStats(dto.movieId, userId);
+    return this.CommonService.getStats(dto.movieId, userId);
   }
 
-  async watchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
-    const isFirstWatched = await this.markAsWatched(userId, dto.movieId);
-    isFirstWatched && this.tmdbService.updateUserStatsAdd(userId, dto.movieId);
+  async getTopRatedMovies(): Promise<Movie[]> {
 
-    return this.getStats(dto.movieId, userId);
-  }
+    const avg: MovieRating[] = await this.prismaService.$queryRaw`
+      SELECT
+        tmdb_id,
+        AVG(rating) AS vote_average
+      FROM user_ratings
+      GROUP BY tmdb_id
+      ORDER BY vote_average DESC;
+    `;
 
-  async unwatchMovie(userId: number, dto: MovieInteractionDto): Promise<MovieStats> {
-    await this.removeUserRating(userId, dto);
-    await this.removeWatched(userId, dto.movieId);
-    this.tmdbService.updateUserStatsRemove(userId, dto.movieId);
-    return this.getStats(dto.movieId, userId);
-  }
-
-  getRating(userId: number, movieId: string): Promise<number> {
-    if (!userId) return undefined;
-    
-    return this.prismaService.userRatings.findUnique({
-      where: {
-        userRating: {
-          user_id: userId,
-          tmdb_id: movieId
-        }
-      }
-    }).then(result => result ? result.rating : null);
-  }
-
-  async isWatched(userId: number, movieId: string): Promise<boolean> {
-    if (!userId) return undefined;
-
-    const watched = await this.prismaService.userWatched.findUnique({
-      where: {
-        userWatched: {
-          user_id: userId,
-          tmdb_id: movieId
-        }
-      }
-    });
-
-    return watched !== null;
-  }
-
-  async getStats(movieId: string, currentUserId: number): Promise<MovieStats> {
-    const avg = await this.prismaService.userRatings.aggregate({
-      _avg: {
-        rating: true
-      },
-      _count: {
-        user_id: true
-      },
-      where: {
-        tmdb_id: movieId
-      }
-    });
-
-    const watched = await this.prismaService.userWatched.count({
-      where: {
-        tmdb_id: movieId
-      }
-    });
-
-    return {
-      movieId: movieId,
-      voteAvg: avg._avg.rating === null ? 0 : avg._avg.rating,
-      voteCount: avg._count.user_id,
-      watched: watched,
-
-      currentRating: await this.getRating(currentUserId, movieId),
-      isWatched: await this.isWatched(currentUserId, movieId),
-      isFavourite: await this.isFavourite(currentUserId, movieId)
-    }
+    return Promise.all(
+      avg.map(mr =>
+        this.tmdbService.getMovie(mr.tmdb_id)
+          .then(movie => Object.assign(movie, {
+            vote_average: mr.vote_average
+          }))
+      )
+    );
   }
 
   private async upsertUserRating(userId: number, dto: MovieInteractionDto): Promise<void> {
@@ -116,79 +65,5 @@ export class MovieService {
     });
   }
 
-  private async removeUserRating(userId: number, dto: MovieInteractionDto): Promise<void> {
-    await this.prismaService.userRatings.deleteMany({
-      where: {
-        user_id: userId,
-        tmdb_id: dto.movieId
-      }
-    });
-  }
 
-
-  private async markAsWatched(userId: number, movieId: string): Promise<boolean> {
-    const record = await this.prismaService.userWatched.findUnique({
-      where: {
-        userWatched: {
-          user_id: userId,
-          tmdb_id: movieId
-        }
-      }
-    });
-
-    if (record) return false;
-
-    await this.prismaService.userWatched.create({
-      data: {
-        user_id: userId,
-        tmdb_id: movieId
-      }
-    });
-
-    return true;
-  }
-
-  private async removeWatched(userId: number, movieId: string): Promise<void> {
-    await this.prismaService.userWatched.deleteMany({
-      where: {
-        user_id: userId,
-        tmdb_id: movieId
-      }
-    });
-  }
-
-  async getTopRatedMovies(): Promise<Movie[]> {
-    const avg: MovieRating[] = await this.prismaService.$queryRaw`
-      SELECT
-        tmdb_id,
-        AVG(rating) AS vote_average
-      FROM user_ratings
-      GROUP BY tmdb_id
-      ORDER BY vote_average DESC;
-    `;
-
-    return Promise.all(
-      avg.map(mr =>
-        this.tmdbService.getMovie(mr.tmdb_id)
-          .then(movie => Object.assign(movie, {
-            vote_average: mr.vote_average
-          }))
-      )
-    );
-  }
-
-  private async isFavourite(userId: number, movieId: string): Promise<boolean> {
-    if (!userId) return undefined;
-
-    const record = await this.prismaService.favourites.findUnique({
-      where: {
-        userFavourite: {
-          user_id: userId,
-          tmdb_id: movieId
-        }
-      }
-    });
-
-    return record !== null;
-  }
 }

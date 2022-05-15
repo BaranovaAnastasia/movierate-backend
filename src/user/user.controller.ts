@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
-import { Public } from 'src/common/decorators';
+import { GetCurrentUserId, Public } from 'src/common/decorators';
 import { Profile } from 'src/common/types';
 import { UserTopEntry } from './dto';
 import { UserService } from './user.service';
@@ -34,7 +34,42 @@ export class UserController {
   @Public()
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  getUserById(@Param('id') id: number): Promise<Profile> {
-    return this.userService.getUserById(Number(id));
+  getUserById(
+    @GetCurrentUserId() currentUserId: number,
+    @Param('id') id: number
+  ): Promise<Profile> {
+    return this.userService.getUserById(Number(id), currentUserId);
+  }
+
+  @Post('follow/:id')
+  @HttpCode(HttpStatus.OK)
+  followUser(
+    @GetCurrentUserId() currentUserId: number,
+    @Param('id') id: number
+  ): Promise<Profile[]> {
+    return this.userService.follow(currentUserId, Number(id));
+  }
+
+  @Post('unfollow/:id')
+  @HttpCode(HttpStatus.OK)
+  unfollowUser(
+    @GetCurrentUserId() currentUserId: number,
+    @Param('id') id: number
+  ): Promise<Profile[]> {
+    return this.userService.unfollow(currentUserId, Number(id));
+  }
+
+  @Public()
+  @Get('following/:id')
+  @HttpCode(HttpStatus.OK)
+  getFollowing(@Param('id') id: number): Promise<Profile[]> {
+    return this.userService.getAllFollowing(Number(id));
+  }
+
+  @Public()
+  @Get('followedBy/:id')
+  @HttpCode(HttpStatus.OK)
+  getFollowedBy(@Param('id') id: number): Promise<Profile[]> {
+    return this.userService.getAllFollowedBy(Number(id));
   }
 }

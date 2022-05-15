@@ -59,7 +59,7 @@ export class MoviesListsController {
   removeMovieFromList(
     @GetCurrentUserId() userId: number,
     @Body() dto: ListMovieDto
-  ): Promise<void> {
+  ): Promise<MoviesList> {
     return this.moviesListsService.removeMovieFromList(userId, dto);
   }
 

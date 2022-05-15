@@ -9,6 +9,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ReviewModule } from './review/review.module';
 import { UserModule } from './user/user.module';
 import { FavouritesModule } from './favourites/favourites.module';
+import { WatchedModule } from './watched/watched.module';
+import { FeedModule } from './feed/feed.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { FavouritesModule } from './favourites/favourites.module';
     MovieModule,
     ReviewModule,
     MoviesListsModule,
-    FavouritesModule
+    FavouritesModule,
+    WatchedModule,
+    FeedModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: AtGuard }

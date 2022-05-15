@@ -1,6 +1,5 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { Observable } from 'rxjs';
 import { TMDBService } from 'src/common/services';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ListMovieDto, MoviesListDto } from './dto';
@@ -74,7 +73,7 @@ export class MoviesListsService {
     });
   }
 
-  async removeMovieFromList(userId: number, dto: ListMovieDto): Promise<void> {
+  async removeMovieFromList(userId: number, dto: ListMovieDto): Promise<MoviesList> {
     const list = await this.prismaService.moviesList.findUnique({
       where: {
         id: dto.listId
@@ -97,6 +96,8 @@ export class MoviesListsService {
         }
       }
     });
+
+    return this.getList(dto.listId, userId);
   }
 
   async getList(listId: number, currentUserId: number): Promise<MoviesList> {

@@ -1,6 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { UserGenresStats, UserStats } from '@prisma/client';
-import { Observable } from 'rxjs';
 import { Profile } from 'src/common/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserTopEntry } from './dto';
@@ -12,7 +11,7 @@ export class UserService {
     private prismaService: PrismaService
   ) { }
 
-  async getUserById(id: number): Promise<Profile> {
+  async getUserById(id: number, currentUserId?: number): Promise<Profile> {
     const user = await this.prismaService.user.findUnique({
       where: {
         id: id
@@ -25,7 +24,9 @@ export class UserService {
       id: user.id,
       name: user.name,
       email: user.email,
-      avatar_path: user.avatar_path
+      avatar_path: user.avatar_path,
+      isFollowed: await this.isFollowed(currentUserId, id),
+      isCurrentUser: id === currentUserId
     }
   }
 
@@ -46,7 +47,7 @@ export class UserService {
   }
 
   getUserTop(by: UserTopOption, limit: number): Promise<UserTopEntry[]> {
-    switch(by) {
+    switch (by) {
       case 'movies':
         return this.getUserTopByMovies(limit);
       case 'minutes':
@@ -56,7 +57,7 @@ export class UserService {
     }
   }
 
-  async follow(followerId: number, followingId: number): Promise<void> {
+  async follow(followerId: number, followingId: number): Promise<Profile[]> {
     await this.prismaService.follows.upsert({
       where: {
         follow: {
@@ -68,11 +69,13 @@ export class UserService {
         follower_id: followerId,
         following_id: followingId
       },
-      update: { }
+      update: {}
     });
+
+    return this.getAllFollowedBy(followingId);
   }
 
-  async unfollow(followerId: number, followingId: number): Promise<void> {
+  async unfollow(followerId: number, followingId: number): Promise<Profile[]> {
     await this.prismaService.follows.delete({
       where: {
         follow: {
@@ -81,6 +84,53 @@ export class UserService {
         }
       }
     });
+
+    return this.getAllFollowedBy(followingId);
+  }
+
+  async isFollowed(followerId: number, followingId: number): Promise<boolean> {
+    if(!followerId) return undefined;
+
+    const record = await this.prismaService.follows.findUnique({
+      where: {
+        follow: {
+          follower_id: followerId,
+          following_id: followingId
+        }
+      }
+    });
+
+    return record !== null;
+  }
+
+  async getAllFollowing(userId: number): Promise<Profile[]> {
+    const records = await this.prismaService.follows.findMany({
+      where: {
+        follower_id: userId
+      },
+      select: {
+        following_id: true
+      }
+    });
+
+    return Promise.all(
+      records.map(record => this.getUserById(record.following_id))
+    )
+  }
+
+  async getAllFollowedBy(userId: number): Promise<Profile[]> {
+    const records = await this.prismaService.follows.findMany({
+      where: {
+        following_id: userId
+      },
+      select: {
+        follower_id: true
+      }
+    });
+
+    return Promise.all(
+      records.map(record => this.getUserById(record.follower_id))
+    )
   }
 
   private getUserTopByMovies(limit: number): Promise<UserTopEntry[]> {

@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { CommonService } from 'src/common/services';
 import { TMDBService } from 'src/common/services';
-import { Movie } from 'src/common/types';
+import { Movie, MovieStats } from 'src/common/types';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class FavouritesService {
   constructor(
+    private CommonService: CommonService,
     private prismaService: PrismaService,
     private tmdbService: TMDBService
   ) { }
 
-  async addMovieToFavourites(userId: number, movieId: string): Promise<void> {
+  async addMovieToFavourites(userId: number, movieId: string): Promise<MovieStats> {
     await this.prismaService.favourites.upsert({
       where: {
         userFavourite: {
@@ -24,9 +26,11 @@ export class FavouritesService {
       },
       update: {}
     });
+
+    return this.CommonService.getStats(movieId, userId);
   }
 
-  async removeMovieFromFavourites(userId: number, movieId: string): Promise<void> {
+  async removeMovieFromFavourites(userId: number, movieId: string): Promise<MovieStats> {
     await this.prismaService.favourites.delete({
       where: {
         userFavourite: {
@@ -35,6 +39,8 @@ export class FavouritesService {
         }
       }
     });
+
+    return this.CommonService.getStats(movieId, userId);
   }
 
   async getFavourites(userId: number): Promise<Movie[]> {

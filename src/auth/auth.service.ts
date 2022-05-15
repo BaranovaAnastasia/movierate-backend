@@ -26,7 +26,7 @@ export class AuthService {
       }
     });
 
-    if (duplicate) throw new ForbiddenException("Email already exists.")
+    if (duplicate) throw new ForbiddenException("Email already in use.")
 
     const newUser = await this.prismaService.user.create({
       data: {
@@ -53,11 +53,11 @@ export class AuthService {
       }
     });
 
-    if (!user) throw new ForbiddenException("User Not Found.");
+    if (!user) throw new ForbiddenException("The user does not exist.");
 
     const passwordMatches = await argon.verify(user.hash, dto.password);
 
-    if (!passwordMatches) throw new ForbiddenException("Access Denied.");
+    if (!passwordMatches) throw new ForbiddenException("Invalid email or password.");
 
     const tokens = await this.getTokens(user.id, dto);
     await this.updateRtHash(user.id, tokens.refresh_token);
@@ -86,11 +86,11 @@ export class AuthService {
       }
     });
 
-    if (!user) throw new ForbiddenException("User Not Found.");
+    if (!user) throw new ForbiddenException("The user does not exist.");
 
     const rtMatches = await argon.verify(user.hashedRt, rt);
 
-    if (!rtMatches) throw new ForbiddenException("Access Denied.");
+    if (!rtMatches) throw new ForbiddenException("Invalid refresh token.");
 
     const tokens = await this.getTokens(
       user.id,
@@ -113,13 +113,14 @@ export class AuthService {
       }
     });
 
-    if(!user) throw new ForbiddenException('User Not Found.');
+    if(!user) throw new ForbiddenException('The user does not exist.');
 
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-      avatar_path: user.avatar_path
+      avatar_path: user.avatar_path,
+      isCurrentUser: true
     }
   }
 
