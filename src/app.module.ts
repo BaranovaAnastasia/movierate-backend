@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { FavouritesModule } from './favourites/favourites.module';
 import { WatchedModule } from './watched/watched.module';
 import { FeedModule } from './feed/feed.module';
+import { TmdbModule } from './tmdb/tmdb.module';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { FeedModule } from './feed/feed.module';
     MoviesListsModule,
     FavouritesModule,
     WatchedModule,
-    FeedModule
+    FeedModule,
+    TmdbModule
   ],
   providers: [
     { provide: APP_GUARD, useClass: AtGuard }
