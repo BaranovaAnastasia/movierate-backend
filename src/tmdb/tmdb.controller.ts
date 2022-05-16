@@ -49,6 +49,6 @@ export class TmdbController {
   @Get('search')
   @HttpCode(HttpStatus.OK)
   searchMovies(@Query() query: any): Observable<Movie[]> {
-    return this.tmdbService.searchMovies(query.term, query.page);
+    return this.tmdbService.searchMovies(encodeURI(query.term), query.page);
   }
 }
